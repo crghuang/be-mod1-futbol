@@ -65,4 +65,39 @@ class StatTracker
   def percentage_ties
     percentage(@game_path, lambda { |x, y| x == y }, [:away_goals, :home_goals], 2)
   end
+
+  def count_of_games_by_season
+    counts = {}
+    csv_open(@game_path).each do |game|
+      if counts[game[:season]] == nil
+        counts[game[:season]] = 1
+      else
+        counts[game[:season]] = counts[game[:season]] + 1
+      end
+    end
+    counts
+  end
+
+  def average_goals_per_game
+    sum = 0
+    total = 0
+    CSV.foreach(@game_path, headers: true, header_converters: :symbol).with_index(1) do |row, ln|
+      sum = row[:away_goals].to_f + row[:home_goals].to_f + sum
+      total = ln
+    end
+    (sum / total.to_f).round(2)
+  end
+
+  def average_goals_by_season
+    games_by_season = count_of_games_by_season()
+    averages = {}
+    csv_open(@game_path).each do |game|
+      if averages[game[:season]] == nil
+        averages[game[:season]] = game[:away_goals].to_f + game[:home_goals].to_f
+      else
+        averages[game[:season]] = averages[game[:season]] + game[:away_goals].to_f + game[:home_goals].to_f
+      end
+    end
+    averages.map { |k,v| [k, (v / games_by_season[k].to_f).round(2)] }
+  end
 end
