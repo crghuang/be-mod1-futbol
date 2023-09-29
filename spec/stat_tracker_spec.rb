@@ -1,5 +1,15 @@
 require 'spec_helper'
 
+RSpec::Matchers.define :be_hash_of_string_int_pairs do
+  description { 'be a hash of string-integer key-value pairs'}
+  
+  match do |actual|
+    actual.each do |k,v|
+      k.match?('\d+') && (v.is_a? Integer)
+    end
+  end
+end
+
 RSpec.describe 'StatTracker' do
   before(:each) do
     game_path = './data/games.csv'
@@ -59,7 +69,19 @@ RSpec.describe 'StatTracker' do
 
   describe '#count_of_games_by_season' do
     it 'finds number of games by season' do
-      expect(@stat_tracker.count_of_games_by_season).to be()
+      expect(@stat_tracker.count_of_games_by_season).to be_hash_of_string_int_pairs()
+    end
+  end
+
+  describe '#average_goals_per_game' do
+    it 'finds average goals per game across all seasons' do
+      expect(@stat_tracker.average_goals_per_game). to be_a_kind_of(Float)
+    end
+  end
+
+  describe '#average_goals_by_season' do
+    it 'finds averages goals by season' do
+      expect(@stat_tracker.average_goals_by_season).to be_hash_of_string_int_pairs()
     end
   end
 end
